@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
 
 export function useCheckWin(playerMarks: number[], computerMarks: number[]) {
-	const [isWin, setIsWin] = useState<'Player Wins!' | 'Computer Wins!' | null>(null)
+	const [isWin, setIsWin] = useState<'won' | 'lost' | null>(null)
 
 	useEffect(() => {
 		const checkWin = (marks: number[]) => {
 			const winConditions = [
-				[0, 1, 2],
-				[3, 4, 5],
-				[6, 7, 8],
-				[0, 3, 6],
+				[1, 2, 3],
+				[4, 5, 6],
+				[7, 8, 9],
 				[1, 4, 7],
 				[2, 5, 8],
-				[0, 4, 8],
-				[2, 4, 6]
+				[3, 6, 9],
+				[1, 5, 9],
+				[3, 5, 7]
 			]
 
 			for (const condition of winConditions) {
@@ -28,7 +28,7 @@ export function useCheckWin(playerMarks: number[], computerMarks: number[]) {
 		const playerWins = checkWin(playerMarks)
 		const computerWins = checkWin(computerMarks)
 
-		setIsWin(playerWins ? 'Player Wins!' : null || computerWins ? 'Computer Wins!' : null)
+		setIsWin(playerWins ? 'won' : null || computerWins ? 'lost' : null)
 	}, [playerMarks, computerMarks])
 
 	return isWin
