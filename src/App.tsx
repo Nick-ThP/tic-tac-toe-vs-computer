@@ -15,37 +15,37 @@ function App() {
 		setGameState('initialized')
 		setPlayerMarks([])
 		setComputerMarks([])
+		setSelectedMark(null)
 	}
 
 	function ticHandler(num: number) {
-		// if (gameState !== 'initialized') {
-		// 	startGameHandler()
-		// }
+		if (gameState !== 'initialized') {
+			startGameHandler()
+			setPlayerMarks((prev) => [...prev.filter((existingNum) => existingNum !== selectedMark), num])
+			playerTurnRef.current = true
+		}
 
-		if (
-			computerMarks.includes(num) ||
-			playerTurnRef.current === true ||
-			(playerMarks.length === 3 && !playerMarks.includes(num) && !selectedMark)
-		)
-			return
+		const markingWithoutSelection = playerMarks.length === 3 && !playerMarks.includes(num) && !selectedMark
+		const ableToSelect = playerMarks.length === 3 && playerMarks.includes(num)
 
-		if (playerMarks.length === 3 && playerMarks.includes(num)) {
-			if (selectedMark === num) return setSelectedMark(null)
-			return setSelectedMark(num)
+		if (computerMarks.includes(num) || playerTurnRef.current === true || markingWithoutSelection) return
+
+		if (ableToSelect) {
+			return setSelectedMark((prev) => (prev === num ? null : num))
 		}
 
 		if (selectedMark) {
 			setPlayerMarks((prev) => [...prev.filter((existingNum) => existingNum !== selectedMark), num])
 			setSelectedMark(null)
 			playerTurnRef.current = true
-		} else if (!selectedMark) {
+		} else {
 			setPlayerMarks((prev) => [...prev, num])
 			playerTurnRef.current = true
 		}
 	}
 
 	useEffect(() => {
-		if (playerTurnRef.current && gameState === 'initialized') {
+		if (playerTurnRef.current && !isWin) {
 			const existingMarks = [...playerMarks, ...computerMarks]
 			const newMarkPossibilities = Array.from({ length: 9 }, (_, index) => index + 1).filter((mark) => !existingMarks.includes(mark))
 			const newMarkIndex = Math.floor(Math.random() * newMarkPossibilities.length)
@@ -71,7 +71,7 @@ function App() {
 				}, 1000)
 			}
 		}
-	}, [playerMarks, computerMarks])
+	}, [playerMarks, computerMarks, isWin])
 
 	useEffect(() => {
 		if (isWin) {
@@ -81,11 +81,14 @@ function App() {
 
 	return (
 		<div className='flex flex-col justify-center items-center gap-10'>
+			<div className={`text-black font-bold text-5xl ${gameState === 'won' || gameState === 'lost' ? 'visible' : 'invisible'}`}>
+				You {gameState}!
+			</div>
 			<div className='grid gap-5 grid-cols-3 grid-rows-3 min-h-full min-w-full'>
 				{Array.from({ length: 9 }, (_, index) => index + 1).map((num) => (
 					<div
 						className={`h-40 w-40 bg-slate-300 border-4 border-black flex justify-center items-center cursor-pointer text-7xl rounded-md text-black ${
-							selectedMark === num && 'bg-red-400'
+							selectedMark === num && 'bg-red-200'
 						}`}
 						onClick={() => ticHandler(num)}
 						key={num}
@@ -95,13 +98,12 @@ function App() {
 					</div>
 				))}
 			</div>
-
-			{gameState !== 'initialized' && (
-				<>
-					{(gameState === 'won' || gameState === 'lost') && <div className='text-black font-bold text-xl'>You {gameState}!</div>}
-					<button onClick={startGameHandler}>{gameState === 'won' || gameState === 'lost' ? 'Play again' : 'Start game'}</button>
-				</>
-			)}
+			<button
+				onClick={startGameHandler}
+				className={`border-black hover:bg-slate-400 hover:border-collapse ${gameState === 'initialized' ? 'invisible' : 'visible'}`}
+			>
+				{gameState === 'won' || gameState === 'lost' ? 'Play again' : 'Start game'}
+			</button>
 		</div>
 	)
 }
