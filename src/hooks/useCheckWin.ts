@@ -28,7 +28,7 @@ export function useCheckWin(playerMarks: number[], computerMarks: number[]) {
 		const playerWins = checkWin(playerMarks)
 		const computerWins = checkWin(computerMarks)
 
-		setIsWin(playerWins ? 'won' : null || computerWins ? 'lost' : null)
+		setIsWin((playerWins && 'won') || (computerWins && 'lost') || null)
 	}, [playerMarks, computerMarks])
 
 	return isWin
