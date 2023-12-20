@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { BsCircle, BsXLg } from 'react-icons/bs'
 import './App.css'
 import { useCheckWin } from './hooks/useCheckWin'
+import { calculateBestMove } from './utils/calculateBestMove'
 
 export function App() {
 	const [gameState, setGameState] = useState<'initialized' | 'won' | 'lost' | null>(null)
@@ -16,6 +17,12 @@ export function App() {
 
 	const COMPUTER_MARK_TIMER = 600
 	const COMPUTER_SELECT_TIMER = 300
+	const clickHintArray =
+		playerTurnRef.current === false
+			? !selectedMark && playerMarks.length === 3
+				? playerMarks
+				: Array.from({ length: 9 }, (_, index) => index + 1).filter((num) => ![...playerMarks, ...computerMarks].includes(num))
+			: []
 
 	function startGameHandler() {
 		setPlayerMarks([])
@@ -27,12 +34,6 @@ export function App() {
 	}
 
 	function markingHandler(num: number) {
-		if (gameState !== 'initialized') {
-			startGameHandler()
-			setPlayerMarks([num])
-			playerTurnRef.current = true
-		}
-
 		const markingWithoutSelection = playerMarks.length === 3 && !playerMarks.includes(num) && !selectedMark
 		const ableToSelect = playerMarks.length === 3 && playerMarks.includes(num)
 
@@ -54,29 +55,30 @@ export function App() {
 	}
 
 	const computerTurn = useCallback(() => {
-		const existingMarks = [...playerMarks, ...computerMarks]
-		const newMarkPossibilities = Array.from({ length: 9 }, (_, index) => index + 1).filter((mark) => !existingMarks.includes(mark))
-		const newMarkIndex = Math.floor(Math.random() * newMarkPossibilities.length)
-		const selectionIndex = Math.floor(Math.random() * 3)
-
+		// Turn with under three marks
 		if (playerMarks.length > computerMarks.length) {
 			underThreeMarksTurnRef.current = setTimeout(() => {
-				setComputerMarks((prev) => [...prev, newMarkPossibilities[newMarkIndex]])
-				playerTurnRef.current = false
+				const moveResult = calculateBestMove(playerMarks, computerMarks, false)
+				if (typeof moveResult === 'number') {
+					setComputerMarks((prev) => [...prev, moveResult])
+					playerTurnRef.current = false
+				}
 			}, COMPUTER_MARK_TIMER)
 		}
 
+		// Turn with three marks
 		if (playerMarks.length === computerMarks.length) {
 			threeMarksTurnRef.current = setTimeout(() => {
-				setSelectedMark(computerMarks[selectionIndex])
-				setTimeout(() => {
-					setComputerMarks((prev) => [
-						...prev.filter((existingNum) => existingNum !== computerMarks[selectionIndex]),
-						newMarkPossibilities[newMarkIndex]
-					])
-					setSelectedMark(null)
-					playerTurnRef.current = false
-				}, COMPUTER_MARK_TIMER)
+				const moveResult = calculateBestMove(playerMarks, computerMarks, true)
+				if (typeof moveResult !== 'number') {
+					const { selectedSpot, newSpot } = moveResult
+					setSelectedMark(selectedSpot)
+					setTimeout(() => {
+						setComputerMarks((prev) => [...prev.filter((existingNum) => existingNum !== selectedSpot), newSpot])
+						setSelectedMark(null)
+						playerTurnRef.current = false
+					}, COMPUTER_MARK_TIMER)
+				}
 			}, COMPUTER_SELECT_TIMER)
 		}
 	}, [computerMarks, playerMarks])
@@ -102,9 +104,9 @@ export function App() {
 			<div className='grid gap-5 grid-cols-3 grid-rows-3 min-h-full min-w-full'>
 				{Array.from({ length: 9 }, (_, index) => index + 1).map((num) => (
 					<div
-						className={`h-40 w-40 border-4 border-black flex justify-center items-center cursor-pointer text-7xl rounded-md text-black transform hover:scale-105 ${
-							selectedMark === num ? 'bg-red-300' : 'bg-slate-300'
-						}`}
+						className={`h-40 w-40 border-4 border-black flex justify-center items-center cursor-pointer text-7xl rounded-md text-black transform ${
+							clickHintArray.includes(num) ? 'hover:scale-105' : null
+						} ${selectedMark === num ? 'bg-red-300' : 'bg-slate-300'}`}
 						onClick={() => markingHandler(num)}
 						key={num}
 					>
