@@ -27,12 +27,11 @@ a:hover {
 }
 
 body {
-	margin: 0;
 	display: flex;
 	place-items: center;
-	min-width: 320px;
+	min-width: 100vw;
 	min-height: 100vh;
-	background-color: rgb(253, 245, 234);
+	background-color: rgb(255, 244, 237);
 }
 
 h1 {

@@ -18,7 +18,7 @@ export function App() {
 	const COMPUTER_MARK_TIMER = 600
 	const COMPUTER_SELECT_TIMER = 300
 	const clickHintArray =
-		playerTurnRef.current === false
+		playerTurnRef.current === false && !isWin
 			? !selectedMark && playerMarks.length === 3
 				? playerMarks
 				: Array.from({ length: 9 }, (_, index) => index + 1).filter((num) => ![...playerMarks, ...computerMarks].includes(num))
@@ -101,13 +101,13 @@ export function App() {
 			<div className={`text-black font-bold text-5xl ${gameState === 'won' || gameState === 'lost' ? 'visible' : 'invisible'}`}>
 				You {gameState}!
 			</div>
-			<div className='grid gap-5 grid-cols-3 grid-rows-3 min-h-full min-w-full'>
+			<div className='grid gap-5 grid-cols-3 grid-rows-3'>
 				{Array.from({ length: 9 }, (_, index) => index + 1).map((num) => (
 					<div
-						className={`h-40 w-40 border-4 border-black flex justify-center items-center cursor-pointer text-7xl rounded-md text-black transform ${
+						className={`h-24 w-24 md:h-40 md:w-40 border-4 border-black flex justify-center items-center cursor-pointer text-5xl md:text-7xl rounded-md transform ${
 							clickHintArray.includes(num) ? 'hover:scale-105' : null
-						} ${selectedMark === num ? 'bg-red-300' : 'bg-slate-300'}`}
-						onClick={() => markingHandler(num)}
+						} ${selectedMark === num ? 'bg-red-300' : 'bg-slate-300'} ${isWin ? 'text-darkgray' : 'text-black'}`}
+						onClick={!isWin ? () => markingHandler(num) : undefined}
 						key={num}
 					>
 						{(playerMarks.find((mark) => mark === num) && <BsCircle />) ||
