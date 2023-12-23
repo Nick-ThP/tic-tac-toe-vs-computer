@@ -3,6 +3,7 @@ import { BsCircle, BsXLg } from 'react-icons/bs'
 import './App.css'
 import { useCheckWin } from './hooks/useCheckWin'
 import { calculateBestMove } from './utils/calculateBestMove'
+import { createHeadline } from './utils/createHeadline'
 
 export function App() {
 	const [gameState, setGameState] = useState<'initialized' | 'won' | 'lost' | null>(null)
@@ -98,9 +99,7 @@ export function App() {
 
 	return (
 		<div className='flex flex-col justify-center items-center gap-10'>
-			<div className={`text-black font-bold text-5xl ${gameState === 'won' || gameState === 'lost' ? 'visible' : 'invisible'}`}>
-				You {gameState}!
-			</div>
+			<div className={`text-black font-bold text-5xl`}>{createHeadline(gameState)}</div>
 			<div className='grid gap-5 grid-cols-3 grid-rows-3'>
 				{Array.from({ length: 9 }, (_, index) => index + 1).map((num) => (
 					<div
