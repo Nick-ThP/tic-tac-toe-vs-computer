@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { checkWinning } from '../utils/calculateBestMove'
+import { checkIfWinning } from '../utils/checkIfWinning'
 
 export function useCheckWin(playerMarks: number[], computerMarks: number[]) {
 	const [isWin, setIsWin] = useState<'won' | 'lost' | null>(null)
 
 	useEffect(() => {
-		const playerWins = checkWinning(playerMarks)
-		const computerWins = checkWinning(computerMarks)
+		const playerWins = checkIfWinning(playerMarks)
+		const computerWins = checkIfWinning(computerMarks)
 
 		setIsWin((playerWins && 'won') || (computerWins && 'lost') || null)
 	}, [playerMarks, computerMarks])
