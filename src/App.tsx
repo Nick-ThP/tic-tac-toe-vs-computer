@@ -19,7 +19,7 @@ export function App() {
 	const COMPUTER_MARK_TIMER = 600
 	const COMPUTER_SELECT_TIMER = 300
 	const clickHintArray =
-		playerTurnRef.current === false && !isWin
+		playerTurnRef.current === false && gameState === 'initialized'
 			? !selectedMark && playerMarks.length === 3
 				? playerMarks
 				: Array.from({ length: 9 }, (_, index) => index + 1).filter((num) => ![...playerMarks, ...computerMarks].includes(num))
@@ -106,7 +106,7 @@ export function App() {
 						className={`h-24 w-24 md:h-40 md:w-40 border-4 border-black flex justify-center items-center cursor-pointer text-5xl md:text-7xl rounded-md transform ${
 							clickHintArray.includes(num) ? 'hover:scale-105' : null
 						} ${selectedMark === num ? 'bg-red-300' : 'bg-slate-300'} ${isWin ? 'text-darkgray' : 'text-black'}`}
-						onClick={!isWin ? () => markingHandler(num) : undefined}
+						onClick={gameState === 'initialized' ? () => markingHandler(num) : undefined}
 						key={num}
 					>
 						{(playerMarks.find((mark) => mark === num) && <BsCircle />) ||
